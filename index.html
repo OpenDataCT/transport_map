@@ -1,0 +1,42 @@
+<html>
+<head>
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
+</head>
+<body>
+    <div id="map" style="width: 700px; height: 500px"></div>
+
+    <script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
+    <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+
+    <script>
+        var lat = 39;
+        var lng = 17;
+        var zoom = 2;
+        var map = L.map('map').setView([lat,lng],zoom);
+
+        // set up the ajax call
+        function getXML(url) {
+            return $.get(url)
+        }
+
+        // fire and handle the result
+        getXML('http://www.geonames.org/recent-changes.xml').done(function(xml){
+            var output = {}; // restructure the xml as an object
+            $(xml).find('item').each(function() {
+                var nodes = $(this).children();
+                $.each(nodes, function(i,node){
+                    var name = node.tagName;
+                    var value = node.textContent;
+                    output[name] = value;
+                });
+                // build markers from the output and add to the map
+                var marker = L.marker([output['georss:point'].split(' ')[0], output['georss:point'].split(' ')[1]]);
+                var popupContent = output.description; 
+                marker.bindPopup(popupContent)
+                marker.addTo(map);
+            });
+        })
+
+    </script>
+</body>
+</html>
